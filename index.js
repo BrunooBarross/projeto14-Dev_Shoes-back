@@ -13,7 +13,6 @@ app.use(json());
 const usuarioSchema = joi.object({
     nome: joi.string().required(),
     email: joi.string().email().required(),
-    //FIXME validar o campo de foto
     foto: joi.string().regex(/(https:\/\/)([^\s(["<,>/]*)(\/)[^\s[",><]*(.png|.jpg)(\?[^\s[",><]*)?/),
     senha: joi.string().required(),
     confirmarSenha: joi.ref('senha'),
@@ -45,5 +44,5 @@ app.post('/cadastro', async(req, res)=>{
     }
 });
 
-const port = process.env.PORT || 5500;
+const port = process.env.PORT || 5000;
 app.listen(port, console.log(chalk.bold.blue(` Servidor rodando na porta ${port}`)));
