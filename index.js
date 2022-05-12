@@ -27,6 +27,7 @@ const usuarioSchema = joi.object({
 app.post('/cadastro', async(req, res)=>{
     const novousuario = req.body;
     const {email} = novousuario;
+    
     const {error} = usuarioSchema.validate(novousuario);
     if (error){
         return res.status(422).send(error.details);
