@@ -87,6 +87,19 @@ app.get("/produtos", async (req, res) => {
     }
 })
 
+app.get("/produtos/:id", async (req, res) => {
+    const id = req.params.id;
+    try {
+        const produto = await db.collection("produtos").findOne({_id : ObjectId(id)});
+        if(!produto){ ressendStatus(404); return;}
+        res.status(200).send(produto);
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+        mongoClient.close();
+    }
+})
+
 app.delete("/favoritos/:id", async (req, res) => {
     const id = req.params.id;
     const { authorization } = req.headers;
