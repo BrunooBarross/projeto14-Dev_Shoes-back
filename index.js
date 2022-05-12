@@ -2,6 +2,7 @@ import express, { json } from "express";
 import cors from "cors";
 import chalk from "chalk";
 import joi from "joi";
+import bcrypt from "bcrypt"
 import dotenv from "dotenv";
 import db from "./db.js"
 import { ObjectId } from "mongodb";
@@ -27,7 +28,7 @@ const usuarioSchema = joi.object({
 
 app.post('/cadastro', async(req, res)=>{
     const novousuario = req.body;
-    const {email} = novousuario;
+    const {email, senha} = novousuario;
     
     const {error} = usuarioSchema.validate(novousuario);
     if (error){
@@ -39,8 +40,11 @@ app.post('/cadastro', async(req, res)=>{
             return res.status(409).send("Erro! O email já está cadastrado!");
         }
         delete novousuario.confirmarSenha;
+        const senhaCripto = bcrypt.hashSync(senha, 10);
+        novousuario.senha = senhaCripto;
+        console.log(novousuario.senha)
         await db.collection("usuarios").insertOne(novousuario);
-        return res.sendStatus(201);
+        return res.sendStatus(201); 
     } catch (err){
         return res.status(500).send("Erro ao se comunicar com o banco de dados" + err);
     }
