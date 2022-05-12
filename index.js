@@ -79,5 +79,31 @@ app.delete("/favoritos/:id", async (req, res) => {
     }
 })
 
+app.post("/favoritos/:id", async (req, res)=>{
+    const id = req.params.id;
+    const { authorization } = req.headers;
+    const token = authorization?.replace('Bearer ', '').trim();
+    if (!token) return res.sendStatus(401);
+    
+    try{
+        const sessao = await db.collection("sessoes").findOne({token});
+        if (!sessao){
+            return res.sendStatus(401);
+        }
+        const usuario = await db.collection("usuarios").findOne({
+            _id: ObjectId(sessao.usuarioID)
+        })
+        if (!usuario){
+            res.sendStatus(401);
+        }
+
+        await db.collection("favoritos").insertOne({usuarioID: usuario._id, id});
+        return res.send(200);
+    }catch(err){
+        console.log(err);
+        return res.sendStatus(500);
+    }
+})
+
 const port = process.env.PORT || 5000;
 app.listen(port, console.log(chalk.bold.blue(` Servidor rodando na porta ${port}`)));
