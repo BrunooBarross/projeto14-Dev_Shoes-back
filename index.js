@@ -2,6 +2,7 @@ import express, { json } from "express";
 import cors from "cors";
 import chalk from "chalk";
 import joi from "joi";
+import {v4} from "uuid";
 import bcrypt from "bcrypt"
 import dotenv from "dotenv";
 import db from "./db.js"
@@ -26,7 +27,7 @@ const usuarioSchema = joi.object({
     numero: joi.number().integer(),
 });
 
-app.post('/cadastro', async(req, res)=>{
+app.post('/cadastro', async (req, res)=>{
     const novousuario = req.body;
     const {email, senha} = novousuario;
     
@@ -42,12 +43,37 @@ app.post('/cadastro', async(req, res)=>{
         delete novousuario.confirmarSenha;
         const senhaCripto = bcrypt.hashSync(senha, 10);
         novousuario.senha = senhaCripto;
-        console.log(novousuario.senha)
         await db.collection("usuarios").insertOne(novousuario);
         return res.sendStatus(201); 
     } catch (err){
         return res.status(500).send("Erro ao se comunicar com o banco de dados" + err);
     }
+});
+
+app.post('/login', async (req,res)=>{
+    const login = req.body;
+    const {email, senha} = login;
+    try{
+        const usuario = await db.collection("usuarios").findOne({email: email});
+        console.log(usuario)
+
+        if (usuario && bcrypt.compareSync(senha, usuario.senha)){
+            const token = v4();
+
+            await db.collection("sessoes").insertOne({
+                usuarioID : usuario._id,
+                token
+            })
+
+            res.status(200).send({nome: usuario.nome, token});
+        }else{
+            return res.status(401).send("Email e/ou senha inválidos!");
+        }
+
+    }catch(err){
+        return res.status(500).send("Erro ao se comunicar com o banco de dados ", err);
+    }
+
 });
 
 app.get("/produtos", async (req, res) => {
