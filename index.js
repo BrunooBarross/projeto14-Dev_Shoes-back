@@ -158,8 +158,8 @@ app.post("/checkout", async (req, res) => {
     const validacao = dadosBody.validate(req.body, { abortEarly: false });
 
     if (validacao.error) {
-        console.log(chalk.bold.red("nome não pode ser vazio"), validacao.error.details)
-        res.status(422).send("Use o formato: { name: João}");
+        console.log(chalk.bold.red("dados incompletos"), validacao.error.details)
+        res.sendStatus(422);
         return;
     }
 
