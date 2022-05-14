@@ -145,9 +145,10 @@ app.post("/favoritos/:id", async (req, res)=>{
 
 app.post("/checkout", async (req, res) => {
     const { authorization } = req.headers;
+    
     const token = authorization?.replace('Bearer ', '').trim();
     if (!token) { return res.sendStatus(401) };
-    
+
     const dadosBody = joi.object({
         compra: joi.array().items(joi.object({
             produtoID: joi.string().required(),
