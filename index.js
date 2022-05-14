@@ -55,7 +55,6 @@ app.post('/login', async (req,res)=>{
     const {email, senha} = login;
     try{
         const usuario = await db.collection("usuarios").findOne({email: email});
-
         if (usuario && bcrypt.compareSync(senha, usuario.senha)){
             const token = v4();
 
@@ -64,7 +63,7 @@ app.post('/login', async (req,res)=>{
                 token
             })
 
-            res.status(200).send({nome: usuario.nome, token});
+            res.status(200).send({nome: usuario.nome, token, foto: usuario.foto});
         }else{
             return res.status(401).send("Email e/ou senha inválidos!");
         }
