@@ -55,7 +55,6 @@ app.post('/login', async (req,res)=>{
     const {email, senha} = login;
     try{
         const usuario = await db.collection("usuarios").findOne({email: email});
-        console.log(usuario)
 
         if (usuario && bcrypt.compareSync(senha, usuario.senha)){
             const token = v4();
@@ -148,14 +147,16 @@ app.post("/checkout", async (req, res) => {
     const { authorization } = req.headers;
     const token = authorization?.replace('Bearer ', '').trim();
     if (!token) { return res.sendStatus(401) };
-
+    
     const dadosBody = joi.object({
-        compras: joi.array().items(joi.object({
-            idProduto: joi.string().required(),
-            quantidade: joi.string().required(),
-            valorUnit: joi.string().required(),
+        compra: joi.array().items(joi.object({
+            produtoID: joi.string().required(),
+            titulo: joi.string().required(),
+            tamanho: joi.string().required(),
+            valor: joi.string().required(),
+            foto: joi.string().required(),
+            quantidade: joi.number().required(),
         })).required(),
-        valorTotal: joi.string().required()
     })
     const validacao = dadosBody.validate(req.body, { abortEarly: false });
 
@@ -168,7 +169,7 @@ app.post("/checkout", async (req, res) => {
     try {
         const temToken = await db.collection('sessoes').findOne({ token: token });
         if (!temToken) { res.sendStatus(404); return; }
-        const temUsuario = await db.collection("usuarios").findOne({ _id: ObjectId(temToken.idUsuario) });
+        const temUsuario = await db.collection("usuarios").findOne({ _id: ObjectId(temToken.usuarioID) });
         if (!temUsuario) { res.sendStatus(404); return; }
         await db.collection("compras").insertOne({ idUsuario: temUsuario._id, ...req.body });
         res.sendStatus(201);
